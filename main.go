@@ -5,11 +5,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/khisakuni/tracer"
 )
 
 // templ represents a single template
@@ -29,15 +26,15 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var addr = flag.String("addr", ":8080", "The addr of the application.")
+	var host = flag.String("host", ":8080", "The host of the application.")
 	flag.Parse()
 	r := newRoom()
-	r.tracer = trace.New(os.Stdout)
-	http.Handle("/", &templateHandler{filename: "chat.html"})
+	// r.tracer = trace.New(os.Stdout)
+	http.Handle("/chat", MustAuth(&templateHandler{filename: "chat.html"}))
 	http.Handle("/room", r)
 	go r.run()
-	log.Println("Starting web server on", *addr)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
+	log.Println("Starting web server on", *host)
+	if err := http.ListenAndServe(*host, nil); err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
